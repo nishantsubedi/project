@@ -3,7 +3,45 @@
 $table = '$posts';
 
 //$topics = selectAll($table);
-//$posts = selectAll($table);
+
+$servername = 'localhost';
+$username = 'root';
+$password = '';
+$db_name = 'blogsite';
+
+$conn = new MySQLi($servername, $username, $password, $db_name);
+
+if ($conn->connect_error) {
+    die('Database connection error: ' . $conn->connect_error);
+}
+
+function selectAll($table, $conditions = [])
+{
+    global $conn;
+    $sql = "SELECT * FROM $table";
+    if (empty($conditions)) {
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+        $records = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $records;
+    } else {
+        $i = 0;
+        foreach ($conditions as $key => $value) {
+            if ($i === 0) {
+                $sql = $sql . " WHERE $key=?";
+            } else {
+                $sql = $sql . " AND $key=?";
+            }
+            $i++;
+        }
+        
+        $stmt = executeQuery($sql, $conditions);
+        $records = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $records;
+    }
+}
+
+$posts = selectAll('posts');
 
 
 $errors = array();
